@@ -1,11 +1,12 @@
-import flask
+from flask import Flask
 from flask import request, jsonify
 from database.database import get_db
 from models.livre import Livre
 import re
 
 # création de l'application Flask
-app = flask.Flask(__name__)
+
+app = Flask(__name__)
 # activation du mode debug pour le développement
 app.config["DEBUG"] = True
 
@@ -21,6 +22,8 @@ def get_livres():
 def cree_livre():
     try: 
         donnees = request.get_json()
+        if not donnees:
+            return jsonify({"error": "No input data"}), 400
         required_fields = ['titre', 'auteur', 'categorie', 'annee_publication', 'quantite_disponible', 'statut']
         for field in required_fields:
             if field not in donnees:
