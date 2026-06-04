@@ -66,7 +66,7 @@ def envoyer_message_chatbot(message: str) -> str:
         response = requests.post(
             f"{API_URL}/chatbot",
             json={"question": message},
-            timeout=10
+            timeout=120
         )
         if response.status_code == 200:
             return response.json().get('response', "Désolé, je n'ai pas compris.")

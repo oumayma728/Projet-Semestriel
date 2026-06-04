@@ -1,30 +1,19 @@
 import requests
-import json
-from typing import List, Dict, Any
-class OllamaClient:
-    def __init__(self, base_url="http://localhost:11434"):
-        self.base_url = base_url
 
-    def test_connection(self) -> bool:
-        """check if ollama is reachable"""
-        try:
-            response = requests.get(f"{self.base_url}/v1/models")
-            return response.status_code == 200
-        except requests.RequestException:
-            return False
-    def get_models(self) ->List[str]:
-        """get list of available models from ollama"""
-        try:
-            response = requests.get(f"{self.base_url}/v1/models")
-            if response.status_code == 200:
-                models = response.json()
-                return [model["name"] for model in models]
-            response = requests.get(f"{self.base_url}/v1/models")
-            if response.status_code == 200:
-                models = response.json()
-                return [model["name"] for model in models]
-            else:
-                return []
-        except requests.RequestException:
-            return []
-        
+def ask_gemini(user_question, books_context):
+    prompt = f"""Tu es un bibliothécaire virtuel intelligent. Tu gères une bibliothèque et tu réponds aux questions des utilisateurs en français.
+
+Voici les livres disponibles dans la bibliothèque (données réelles) :
+{books_context}
+
+Question de l'utilisateur : {user_question}
+
+Réponds de manière naturelle et précise en te basant uniquement sur les données de la bibliothèque ci-dessus.
+Si le livre n'existe pas, dis-le clairement.
+"""
+    response = requests.post("http://localhost:11434/api/generate", json={
+        "model": "llama3.2:1b",
+        "prompt": prompt,
+        "stream": False
+    })
+    return response.json()["response"]

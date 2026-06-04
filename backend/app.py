@@ -71,15 +71,24 @@ def update_livre(id_livre):
 # ============ CHATBOT ENDPOINT ============
 @app.route('/chatbot', methods=['POST'])
 def chatbot():
-    """Endpoint pour le chatbot"""
     try:
         data = request.get_json()
-        user_question = data.get('question', '').lower()
-        response = process_question(user_question)
+        user_question = data.get('question', '')
+        
+        # Get all books from database as context
+        livres = Livre.get_all_livres()
+        books_context = "\n".join([
+            f"- ID: {l['id_livre']}, Titre: {l['titre']}, Auteur: {l['auteur']}, "
+            f"Catégorie: {l['categorie']}, Année: {l['annee_publication']}, "
+            f"Quantité: {l['quantite_disponible']}, Statut: {l['statut']}"
+            for l in livres
+        ])
+                
+        from chatbot.ollama_client import ask_gemini
+        response = ask_gemini(user_question, books_context)
         return jsonify({'response': response}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 def process_question(question):
     """Analyse la question de l'utilisateur et genere une reponse appropriee"""
     

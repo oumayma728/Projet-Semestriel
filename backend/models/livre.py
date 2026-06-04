@@ -7,7 +7,7 @@ class Livre:
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM livres")
-        return cursor.fetchall()
+        return [dict(row) for row in cursor.fetchall()]
 
     @staticmethod
     def creer_livre(titre, auteur, categorie, annee_publication, quantite_disponible, statut):
@@ -23,49 +23,38 @@ class Livre:
     def delete_livre(id_livre):
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM livres WHERE id = ?", (id_livre,))
+        cursor.execute("DELETE FROM livres WHERE id_livre = ?", (id_livre,))
         conn.commit()
 
     @staticmethod
     def search_livres(id_livre=None, titre=None, auteur=None):
         conn = get_db()
         cursor = conn.cursor()
-
         query = "SELECT * FROM livres WHERE 1=1"
         params = []
-
         if id_livre:
-            query += " AND id = ?"
+            query += " AND id_livre = ?"
             params.append(id_livre)
-
         if titre:
             query += " AND titre LIKE ?"
             params.append(f"%{titre}%")
-
         if auteur:
             query += " AND auteur LIKE ?"
             params.append(f"%{auteur}%")
-
         cursor.execute(query, params)
-        return cursor.fetchall()
+        return [dict(row) for row in cursor.fetchall()]
 
     @staticmethod
     def update_livre(id_livre, data):
         conn = get_db()
         cursor = conn.cursor()
-
         cursor.execute("""
             UPDATE livres
             SET titre=?, auteur=?, categorie=?, annee_publication=?, quantite_disponible=?, statut=?
-            WHERE id=?
+            WHERE id_livre=?
         """, (
-            data["titre"],
-            data["auteur"],
-            data["categorie"],
-            data["annee_publication"],
-            data["quantite_disponible"],
-            data["statut"],
-            id_livre
+            data["titre"], data["auteur"], data["categorie"],
+            data["annee_publication"], data["quantite_disponible"],
+            data["statut"], id_livre
         ))
-
         conn.commit()
